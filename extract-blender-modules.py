@@ -1,6 +1,5 @@
 import bpy
 import os
-import csv
 
 def clean_docstring(doc):
     if not doc:
@@ -10,7 +9,7 @@ def clean_docstring(doc):
     return " ".join(cleaned_doc)
 
 def save_operator_list():
-    output_file_path = "./prompt.txt"
+    output_file_path = os.getenv('OUTPUT_FILE_PATH')
 
     with open(output_file_path, 'w', encoding='utf-8') as outfile:
         outfile.write("For each request, you **must** generate a complete Python script that adheres to the following two-step process:\n\n")
@@ -36,8 +35,6 @@ def save_operator_list():
                 doc = op_func.__doc__
                 cleaned_description = clean_docstring(doc)
                 outfile.write(f"- `bpy.ops.{category}.{op_name}()`: {cleaned_description}\n\n")
-        
-        outfile.write("```\n")
 
     print(f"Operator list exported to: {output_file_path}")
 
