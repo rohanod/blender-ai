@@ -10,13 +10,23 @@ def clean_docstring(doc):
     return " ".join(cleaned_doc)
 
 def save_operator_list():
-    output_file_path = "YOUR/FILE/PATH/operator_list.csv" # Put your filepath here
+    output_file_path = "./prompt.txt"
 
-    with open(output_file_path, 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['Operator', 'Description']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-
+    with open(output_file_path, 'w', encoding='utf-8') as outfile:
+        outfile.write("For each request, you **must** generate a complete Python script that adheres to the following two-step process:\n\n")
+        outfile.write("**Step 1: Scene Preparation**\n\n")
+        outfile.write("* Begin by deleting all objects in the current Blender scene.\n")
+        outfile.write('* **Crucially**, ensure that any object named "placeholder" is **not** deleted.\n\n')
+        outfile.write("**Step 2: Scene Recreation**\n\n")
+        outfile.write("* After the scene is cleared (excluding \"placeholder\"), fully recreate the requested scene or action from scratch using Blender 4.3 Python operators.\n")
+        outfile.write("* Ensure that the script incorporates all previous requests and the new requests provided by the user.\n\n")
+        outfile.write("**Output Requirements:**\n\n")
+        outfile.write("* Under absolutely no circumstances should you output anything other than the raw Python code.\n")
+        outfile.write("* Do not include any explanatory text, conversational elements, or any content that is not directly part of the Python script.\n")
+        outfile.write("* If a request cannot be fulfilled with a valid Blender 4.3 Python operator, return an empty script.\n\n")
+        outfile.write("**Reference Material:**\n\n")
+        outfile.write("The following is a list of `bpy` operators for Blender 4.3. Use this to ensure the generated code is accurate and up-to-date:\n\n")
+        
         op_categories = [attr for attr in dir(bpy.ops) if not attr.startswith("_")]
         for category in op_categories:
             cat_obj = getattr(bpy.ops, category)
@@ -25,7 +35,9 @@ def save_operator_list():
                 op_func = getattr(cat_obj, op_name)
                 doc = op_func.__doc__
                 cleaned_description = clean_docstring(doc)
-                writer.writerow({'Operator': f"bpy.ops.{category}.{op_name}()", 'Description': cleaned_description})
+                outfile.write(f"- `bpy.ops.{category}.{op_name}()`: {cleaned_description}\n\n")
+        
+        outfile.write("```\n")
 
     print(f"Operator list exported to: {output_file_path}")
 
